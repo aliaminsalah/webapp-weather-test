@@ -9,7 +9,7 @@ pipeline {
         }
         stage('Run container') {
             steps {
-                sh ' docker run -d -p 5000:5000 weather-app '
+                sh ' docker run -d -p 5000:5000 webweather '
             }
         }
         stage('Test') {
