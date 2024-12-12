@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'your-dockerhub-username'  
+        DOCKER_REGISTRY = 'aliamin10'  
         IMAGE_NAME = 'webweather'  
     }
 
