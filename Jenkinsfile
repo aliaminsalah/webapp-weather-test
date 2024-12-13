@@ -6,15 +6,16 @@ pipeline {
         IMAGE_NAME = 'webweather'       // Docker image name
         CONTAINER_NAME = 'weather-app'  // Docker container name
         DOCKER_PORT = '5000'            // Application port
+        VERSION_TAG = "${env.BUILD_NUMBER}" // Jenkins build number as version tag
     }
 
     stages {
         stage('Build Image') {
             steps {
                 script {
-                    // Build the Docker image with the specified tag
+                    // Build the Docker image with the specified tags
                     sh """
-                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest .
+                        docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${VERSION_TAG} .
                     """
                 }
             }
@@ -47,9 +48,10 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    //push the image
+                    // Push both the latest and version-tagged images
                     sh """
                         docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${VERSION_TAG}
                     """
                 }
             }
@@ -74,6 +76,7 @@ pipeline {
                 sh """
                     docker rm -f ${CONTAINER_NAME} || true
                     docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest || true
+                    docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME}:${VERSION_TAG} || true
                 """
             }
         }
