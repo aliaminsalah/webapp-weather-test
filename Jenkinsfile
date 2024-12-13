@@ -51,7 +51,6 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         sh """
                             docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
-                            docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
                             docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${VERSION_TAG}
                         """
                     }
