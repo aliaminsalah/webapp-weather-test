@@ -48,11 +48,13 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    // Push both the latest and version-tagged images
-                    sh """
-                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
-                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${VERSION_TAG}
-                    """
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh """
+                            docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                            docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                            docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${VERSION_TAG}
+                        """
+                    }
                 }
             }
         }
