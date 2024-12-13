@@ -12,6 +12,7 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
+                    // Build the Docker image with the specified tag
                     sh """
                         docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest .
                     """
@@ -22,7 +23,7 @@ pipeline {
         stage('Run Container') {
             steps {
                 script {
-                    // Ensure any existing container is removed
+                    // Remove any existing container and start a new one
                     sh """
                         docker rm -f ${CONTAINER_NAME} || true
                         docker run -d --name ${CONTAINER_NAME} -p ${DOCKER_PORT}:${DOCKER_PORT} ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
@@ -34,7 +35,7 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Verify the container is running
+                    // Check if the container is running and test the application
                     sh """
                         docker ps | grep ${CONTAINER_NAME}
                         curl -f http://localhost:${DOCKER_PORT} || exit 1
@@ -46,12 +47,10 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh """
-                            docker login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
-                            docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
-                        """
-                    }
+                    //push the image
+                    sh """
+                        docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
+                    """
                 }
             }
         }
@@ -59,7 +58,7 @@ pipeline {
         stage('Play Ansible') {
             steps {
                 script {
-                    // Assuming inventory and playbook.yml files are available
+                    // Execute the Ansible playbook
                     sh """
                         ansible-playbook -i inventory playbook.yml
                     """
@@ -71,7 +70,7 @@ pipeline {
     post {
         always {
             script {
-                // Cleanup any resources used
+                // Clean up resources after the pipeline run
                 sh """
                     docker rm -f ${CONTAINER_NAME} || true
                     docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest || true
